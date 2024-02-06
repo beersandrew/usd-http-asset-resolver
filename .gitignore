@@ -1,0 +1,12 @@
+**/CMakeFiles/
+**/cmake-build-debug
+**/.idea
+**/.cmake
+**/CMakeCache.txt
+project/.ninja_deps
+project/.ninja_log
+project/compile_commands.json
+**/cmake_install.cmake
+
+**LastTest.log
+
