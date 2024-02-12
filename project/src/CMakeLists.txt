@@ -55,3 +55,33 @@ install(
     DESTINATION
         ./resources
 )
+
+# Define the source and destination paths
+set(PLUGINFO_SOURCE_FILE "${CMAKE_CURRENT_SOURCE_DIR}/plugInfo.json")
+set(PLUGINFO_DESTINATION_DIR "${CMAKE_BINARY_DIR}/build/install/resources")
+
+# Ensure the destination directory exists
+file(MAKE_DIRECTORY ${PLUGINFO_DESTINATION_DIR})
+
+# Add a custom command to copy plugInfo.json to the desired directory
+add_custom_command(
+		OUTPUT ${PLUGINFO_DESTINATION_DIR}/plugInfo.json
+		COMMAND ${CMAKE_COMMAND} -E copy_if_different ${PLUGINFO_SOURCE_FILE} ${PLUGINFO_DESTINATION_DIR}/plugInfo.json
+		DEPENDS ${PLUGINFO_SOURCE_FILE}
+		COMMENT "Copying plugInfo.json to ${PLUGINFO_DESTINATION_DIR}"
+)
+
+# Create a custom target that depends on the copied file
+add_custom_target(copy_plugInfo ALL
+		DEPENDS ${PLUGINFO_DESTINATION_DIR}/plugInfo.json
+)
+
+# Ensure your main target depends on this custom target
+# Replace 'main_target' with the actual main target of your project
+add_dependencies(${PLUGIN_NAME} copy_plugInfo)
+
+set_target_properties(${PLUGIN_NAME} PROPERTIES
+    LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/build/install"
+	OUTPUT_NAME ${PLUGIN_NAME}
+	SUFFIX ".so"
+)

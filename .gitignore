@@ -14,3 +14,7 @@ build/Makefile
 build/src/Makefile
 build/compile_commands.json
 .vscode/settings.json
+project/build.ninja
+project/src/Makefile
+project/build/install/resources/plugInfo.json
+project/build/install/libURIResolver.so
