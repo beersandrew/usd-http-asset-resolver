@@ -19,7 +19,7 @@ ArResolvedPath URIResolver::_Resolve(const std::string& assetPath) const {
         return ArResolvedPath("/bar");
     }
 
-    return ArResolvedPath("/hahaha");
+    return ArResolvedPath("/andy");
 }
 
 PXR_NAMESPACE_CLOSE_SCOPE
