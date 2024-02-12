@@ -10,3 +10,7 @@ project/compile_commands.json
 
 **LastTest.log
 
+build/Makefile
+build/src/Makefile
+build/compile_commands.json
+.vscode/settings.json

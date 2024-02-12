@@ -14,9 +14,14 @@ add_library(${PLUGIN_NAME}
 		${SRC}
 )
 
-include_directories("/Users/andrewbeers/.pyenv/versions/3.9.8/include/python3.9")
-set(Python3_ROOT_DIR "/Users/andrewbeers/.pyenv/versions/3.9.8")
-find_package(Python3 3.9 EXACT REQUIRED)
+set(PYTHON_ROOT "/Users/andrewbeers/.pyenv/versions/3.9.8")
+ # Set the path to the Python executable you want to use
+set(PYTHON_EXECUTABLE "${PYTHON_ROOT}/bin/python3.9")
+set(PYTHON_INCLUDE_DIR "${PYTHON_ROOT}/include/python3.9")
+set(PYTHON_LIBRARY "${PYTHON_ROOT}/lib/libpython3.9.dylib")
+
+# Include the Python include directory
+include_directories(${PYTHON_INCLUDE_DIR})
 
 target_link_libraries(${PLUGIN_NAME}
     PUBLIC
@@ -24,6 +29,7 @@ target_link_libraries(${PLUGIN_NAME}
 		libboost_python39.dylib
 		libusd_ar.dylib
 		libusd_tf.dylib
+		${PYTHON_LIBRARY}
 )
 
 target_include_directories(
