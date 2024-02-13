@@ -1,8 +1,7 @@
 # 4. Include/Link everything
-set(PLUGIN_NAME URIResolver)
+set(PLUGIN_NAME HttpResolver)
 
 link_directories(${USD_LIBRARY_DIR})
-
 
 set(
 	SRC
@@ -13,6 +12,12 @@ add_library(${PLUGIN_NAME}
     SHARED
 		${SRC}
 )
+
+# Find the libcurl package
+find_package(CURL REQUIRED)
+
+# Include directories for libcurl
+include_directories(${CURL_INCLUDE_DIRS})
 
 set(PYTHON_ROOT "/Users/andrewbeers/.pyenv/versions/3.9.8")
  # Set the path to the Python executable you want to use
@@ -30,6 +35,7 @@ target_link_libraries(${PLUGIN_NAME}
 		libusd_ar.dylib
 		libusd_tf.dylib
 		${PYTHON_LIBRARY}
+		${CURL_LIBRARIES}
 )
 
 target_include_directories(

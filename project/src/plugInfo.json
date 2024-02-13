@@ -3,13 +3,13 @@
         {
             "Info": {
                 "Types": {
-                    "URIResolver" : {
+                    "HttpResolver" : {
                         "bases": ["ArResolver"]
                     }
                 }
             },
-            "LibraryPath": "../libURIResolver.so",
-            "Name": "URIResolver",
+            "LibraryPath": "../libHttpResolver.so",
+            "Name": "HttpResolver",
             "Type": "library"
         }
     ]

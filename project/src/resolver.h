@@ -5,12 +5,18 @@
 
 PXR_NAMESPACE_OPEN_SCOPE
 
-class URIResolver : public ArDefaultResolver {
+class HttpResolver : public ArDefaultResolver {
 public:
-    URIResolver();
-    ~URIResolver();
+    HttpResolver();
+    ~HttpResolver();
 
     ArResolvedPath _Resolve(const std::string& path) const override;
+    std::shared_ptr<ArAsset> _OpenAsset(const pxrInternal_v0_24__pxrReserved__::ArResolvedPath &resolvedPath) const override;
+    ArResolvedPath _ResolveForNewAsset(const std::string &assetPath) const override;
+    void setBaseUrl(const std::string &url) const;
+private:
+    mutable std::string baseUrl;
+
 };
 
 PXR_NAMESPACE_CLOSE_SCOPE
