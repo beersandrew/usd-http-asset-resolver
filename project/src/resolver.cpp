@@ -21,135 +21,111 @@ static size_t WriteCallback(void *contents, size_t size, size_t nmemb, std::stri
     return size * nmemb;
 }
 
-    static std::filesystem::path FetchAndDownloadAsset(std::string route) {
-        std::filesystem::path temp_dir = std::filesystem::temp_directory_path();
+static std::filesystem::path FetchAndDownloadAsset(const std::string& baseUrl,
+                                                   const std::string& baseTempDir,
+                                                   const std::string& relativePath) {
+    CURL *curl;
+    CURLcode res;
+    std::string readBuffer;
 
-        CURL *curl;
-        CURLcode res;
-        std::string readBuffer;
+    curl = curl_easy_init();
+    auto filePath = baseTempDir + relativePath;
 
-        curl = curl_easy_init();
-        if(curl) {
-            curl_easy_setopt(curl, CURLOPT_URL, route.c_str());
-            curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, WriteCallback);
-            curl_easy_setopt(curl, CURLOPT_WRITEDATA, &readBuffer);
 
-            res = curl_easy_perform(curl);
-            if(res != CURLE_OK)
-                std::cerr << "curl_easy_perform() failed: " << curl_easy_strerror(res) << std::endl;
-            else
-                std::cout << readBuffer << std::endl;
+    if(curl) {
+        std::string route = baseUrl + relativePath;
+        std::cout << "Fetching from: " << route << std::endl;
+        curl_easy_setopt(curl, CURLOPT_URL, route.c_str());
+        curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, WriteCallback);
+        curl_easy_setopt(curl, CURLOPT_WRITEDATA, &readBuffer);
 
-            curl_easy_cleanup(curl);
-        }
+        res = curl_easy_perform(curl);
 
-        std::filesystem::path systemPath = route;
-        auto fileSystemPath = systemPath.filename();
+        std::filesystem::path dirPath = std::filesystem::path(filePath).parent_path();
 
-        auto filePath = temp_dir.operator+=(fileSystemPath);
-        std::ofstream outFile(filePath);
-        if (outFile) { // Check if the file was successfully opened
-            outFile << readBuffer; // Write the string to the file
-            outFile.close(); // Close the file
-            std::cout << "File written successfully." << filePath << std::endl;
+        // Attempt to create the directory (and any necessary parent directories)
+        if (std::filesystem::create_directories(dirPath)) {
+            std::cout << "Directories created successfully: " << dirPath << std::endl;
         } else {
-            std::cout << "Failed to open file for writing." << std::endl;
+            std::cout << "Directories already exist or cannot be created.\n";
         }
 
-        return filePath;
+        if(res != CURLE_OK)
+            std::cerr << "curl_easy_perform() failed: " << curl_easy_strerror(res) << std::endl;
+        else{
+            std::cout << readBuffer << std::endl;
+            std::ofstream outFile(filePath);
+            if (outFile) { // Check if the file was successfully opened
+                outFile << readBuffer; // Write the string to the file
+                outFile.close(); // Close the file
+                std::cout << "File written successfully." << filePath << std::endl;
+            } else {
+                std::cout << "Failed to open file for writing." << std::endl;
+            }
+        }
+
+        curl_easy_cleanup(curl);
     }
+
+    return filePath;
+}
 
 void HttpResolver::setBaseUrl(const std::string& url) const {
     baseUrl = url;
 }
 
+void HttpResolver::setBaseTempDir(const std::string& tempDir) const {
+    baseTempDir = tempDir;
+}
+
 ArResolvedPath HttpResolver::_Resolve(const std::string& assetPath) const {
     std::cout << "_Resolve: " << assetPath << std::endl;
-    std::string myPath = assetPath;
+    std::string stringAssetPathCopy = assetPath;
+    std::filesystem::path savedAssetFilePath = assetPath;
 
-    if (myPath.find("http") != std::string::npos){
+    if (assetPath.find("http") != std::string::npos){
         std::string githubName = "github.com";
         std::string rawGithubName = "raw.githubusercontent.com";
         std::string blob = "/blob";
 
-        size_t pos = myPath.find(githubName);
+        size_t pos = stringAssetPathCopy.find(githubName);
         if (pos!= std::string::npos) {
-            myPath.replace(pos, githubName.length(), rawGithubName);
+            stringAssetPathCopy.replace(pos, githubName.length(), rawGithubName);
         }
 
-        size_t pos_blob = myPath.find(blob);
+        size_t pos_blob = stringAssetPathCopy.find(blob);
         if (pos_blob!= std::string::npos) {
-            myPath.erase(pos_blob, blob.length());
+            stringAssetPathCopy.erase(pos_blob, blob.length());
         }
 
-        std::cout << "http PATH: " << myPath << std::endl;
+        std::cout << "http PATH: " << stringAssetPathCopy << std::endl;
 
-        std::filesystem::path fullHttpPath = myPath;
+        std::filesystem::path fullHttpRouteAsPath = stringAssetPathCopy;
+        std::filesystem::path rootHttpRouteAsPath = fullHttpRouteAsPath.parent_path();
+        setBaseUrl(rootHttpRouteAsPath.generic_string() + "/");
 
-        std::filesystem::path rootHttpPath = fullHttpPath.parent_path();
+        std::filesystem::path tempDir = std::filesystem::temp_directory_path();
+        setBaseTempDir(tempDir.generic_string());
 
-        setBaseUrl(rootHttpPath.generic_string() + "/");
+        savedAssetFilePath = FetchAndDownloadAsset(baseUrl,
+                                                   baseTempDir,
+                                                   fullHttpRouteAsPath.filename());
 
-        std::filesystem::path temp_dir = std::filesystem::temp_directory_path();
-
-        CURL *curl;
-        CURLcode res;
-        std::string readBuffer;
-
-        curl = curl_easy_init();
-        if(curl) {
-            curl_easy_setopt(curl, CURLOPT_URL, myPath.c_str());
-            curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, WriteCallback);
-            curl_easy_setopt(curl, CURLOPT_WRITEDATA, &readBuffer);
-
-            res = curl_easy_perform(curl);
-            if(res != CURLE_OK)
-                std::cerr << "curl_easy_perform() failed: " << curl_easy_strerror(res) << std::endl;
-            else
-                std::cout << readBuffer << std::endl;
-
-            curl_easy_cleanup(curl);
-        }
-
-        std::filesystem::path systemPath = myPath;
-        auto fileSystemPath = systemPath.filename();
-
-        auto filePath = temp_dir.operator+=(fileSystemPath);
-        std::ofstream outFile(filePath);
-        if (outFile) { // Check if the file was successfully opened
-            outFile << readBuffer; // Write the string to the file
-            outFile.close(); // Close the file
-            std::cout << "File written successfully." << filePath << std::endl;
-        } else {
-            std::cout << "Failed to open file for writing." << std::endl;
-        }
-
-        return ArResolvedPath(filePath);
+        return ArResolvedPath(savedAssetFilePath);
     }
     else if (std::filesystem::exists(assetPath)){
         std::cout << "Already Exists: " << assetPath << std::endl;
-        return ArResolvedPath(assetPath);
     }
     else {
-        std::cout << "Does not exist, trying from baseUrl: " << baseUrl << std::endl;
-        std::filesystem::path systemPath = myPath;
+        std::filesystem::path systemPath = stringAssetPathCopy;
+        std::filesystem::path relativePath = std::filesystem::relative(systemPath, baseTempDir);
 
-        std::filesystem::path temp_dir = std::filesystem::temp_directory_path();
-
-        std::filesystem::path relativePath = std::filesystem::relative(systemPath, temp_dir);
-
-        auto totalAssetPath = baseUrl + relativePath.generic_string();
-
-        auto resolvedPath = FetchAndDownloadAsset(totalAssetPath);
-
-        std::cout << "Assumed to exist now, trying from baseUrl: " << resolvedPath << std::endl;
-
-        return ArResolvedPath(resolvedPath);
+        savedAssetFilePath = FetchAndDownloadAsset(baseUrl, baseTempDir, relativePath);
+        std::cout << "Assumed to exist now, trying from baseUrl: " << savedAssetFilePath << std::endl;
     }
 
+    return ArResolvedPath(savedAssetFilePath);
 }
-
-
 
 std::shared_ptr<ArAsset> HttpResolver::_OpenAsset(const ArResolvedPath &resolvedPath) const {
     std::cout << "_OpenAsset: " << resolvedPath.GetPathString() << std::endl;

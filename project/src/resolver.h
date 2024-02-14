@@ -14,9 +14,10 @@ public:
     std::shared_ptr<ArAsset> _OpenAsset(const pxrInternal_v0_24__pxrReserved__::ArResolvedPath &resolvedPath) const override;
     ArResolvedPath _ResolveForNewAsset(const std::string &assetPath) const override;
     void setBaseUrl(const std::string &url) const;
+    void setBaseTempDir(const std::string &tempDir) const;
 private:
     mutable std::string baseUrl;
-
+    mutable std::string baseTempDir;
 };
 
 PXR_NAMESPACE_CLOSE_SCOPE
