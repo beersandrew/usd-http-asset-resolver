@@ -23,7 +23,8 @@ static size_t WriteCallback(void *contents, size_t size, size_t nmemb, std::stri
 
 static std::filesystem::path FetchAndDownloadAsset(const std::string& baseUrl,
                                                    const std::string& baseTempDir,
-                                                   const std::string& relativePath) {
+                                                   const std::string& relativePath,
+                                                   bool verbose) {
     CURL *curl;
     CURLcode res;
     std::string readBuffer;
@@ -34,7 +35,9 @@ static std::filesystem::path FetchAndDownloadAsset(const std::string& baseUrl,
 
     if(curl) {
         std::string route = baseUrl + relativePath;
-        std::cout << "Fetching from: " << route << std::endl;
+        if (verbose){
+            std::cout << "Fetching from: " << route << std::endl;
+        }
         curl_easy_setopt(curl, CURLOPT_URL, route.c_str());
         curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, WriteCallback);
         curl_easy_setopt(curl, CURLOPT_WRITEDATA, &readBuffer);
@@ -45,22 +48,32 @@ static std::filesystem::path FetchAndDownloadAsset(const std::string& baseUrl,
 
         // Attempt to create the directory (and any necessary parent directories)
         if (std::filesystem::create_directories(dirPath)) {
-            std::cout << "Directories created successfully: " << dirPath << std::endl;
+            if (verbose){
+                std::cout << "Directories created successfully: " << dirPath << std::endl;
+            }
         } else {
-            std::cout << "Directories already exist or cannot be created.\n";
+            if (verbose){
+                std::cout << "Directories already exist or cannot be created.\n";
+            }
         }
 
         if(res != CURLE_OK)
             std::cerr << "curl_easy_perform() failed: " << curl_easy_strerror(res) << std::endl;
         else{
-            std::cout << readBuffer << std::endl;
+            if (verbose){
+                std::cout << readBuffer << std::endl;
+            }
             std::ofstream outFile(filePath);
             if (outFile) { // Check if the file was successfully opened
                 outFile << readBuffer; // Write the string to the file
                 outFile.close(); // Close the file
-                std::cout << "File written successfully." << filePath << std::endl;
+                if (verbose){
+                    std::cout << "File written successfully." << filePath << std::endl;
+                }
             } else {
-                std::cout << "Failed to open file for writing." << std::endl;
+                if (verbose){
+                    std::cout << "Failed to open file for writing." << std::endl;
+                }
             }
         }
 
@@ -79,7 +92,10 @@ void HttpResolver::setBaseTempDir(const std::string& tempDir) const {
 }
 
 ArResolvedPath HttpResolver::_Resolve(const std::string& assetPath) const {
-    std::cout << "_Resolve: " << assetPath << std::endl;
+
+    if (verbose){
+        std::cout << "_Resolve: " << assetPath << std::endl;
+    }
     std::string stringAssetPathCopy = assetPath;
     std::filesystem::path savedAssetFilePath = assetPath;
 
@@ -98,7 +114,9 @@ ArResolvedPath HttpResolver::_Resolve(const std::string& assetPath) const {
             stringAssetPathCopy.erase(pos_blob, blob.length());
         }
 
-        std::cout << "http PATH: " << stringAssetPathCopy << std::endl;
+        if (verbose){
+            std::cout << "http PATH: " << stringAssetPathCopy << std::endl;
+        }
 
         std::filesystem::path fullHttpRouteAsPath = stringAssetPathCopy;
         std::filesystem::path rootHttpRouteAsPath = fullHttpRouteAsPath.parent_path();
@@ -109,31 +127,42 @@ ArResolvedPath HttpResolver::_Resolve(const std::string& assetPath) const {
 
         savedAssetFilePath = FetchAndDownloadAsset(baseUrl,
                                                    baseTempDir,
-                                                   fullHttpRouteAsPath.filename());
+                                                   fullHttpRouteAsPath.filename(),
+                                                   verbose);
 
         return ArResolvedPath(savedAssetFilePath);
     }
     else if (std::filesystem::exists(assetPath)){
-        std::cout << "Already Exists: " << assetPath << std::endl;
+        if (verbose) {
+            std::cout << "Already Exists: " << assetPath << std::endl;
+        }
     }
     else {
         std::filesystem::path systemPath = stringAssetPathCopy;
         std::filesystem::path relativePath = std::filesystem::relative(systemPath, baseTempDir);
 
-        savedAssetFilePath = FetchAndDownloadAsset(baseUrl, baseTempDir, relativePath);
-        std::cout << "Assumed to exist now, trying from baseUrl: " << savedAssetFilePath << std::endl;
+        savedAssetFilePath = FetchAndDownloadAsset(baseUrl, baseTempDir, relativePath, verbose);
+        if (verbose){
+            std::cout << "Assumed to exist now, trying from baseUrl: " << savedAssetFilePath << std::endl;
+        }
     }
 
     return ArResolvedPath(savedAssetFilePath);
 }
 
 std::shared_ptr<ArAsset> HttpResolver::_OpenAsset(const ArResolvedPath &resolvedPath) const {
-    std::cout << "_OpenAsset: " << resolvedPath.GetPathString() << std::endl;
+    if (verbose){
+        std::cout << "_OpenAsset: " << resolvedPath.GetPathString() << std::endl;
+    }
+
     return ArDefaultResolver::_OpenAsset(resolvedPath);
 }
 
 ArResolvedPath HttpResolver::_ResolveForNewAsset(const std::string &assetPath) const {
-    std::cout << "Resolve for new asset" << std::endl;
+    if (verbose){
+        std::cout << "Resolve for new asset" << std::endl;
+    }
+
     return ArDefaultResolver::_ResolveForNewAsset(assetPath);
 }
 

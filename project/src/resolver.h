@@ -17,6 +17,7 @@ public:
     void setBaseTempDir(const std::string &tempDir) const;
 private:
     mutable std::string baseUrl;
+    bool verbose = false;
     mutable std::string baseTempDir;
 };
 

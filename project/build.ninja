@@ -117,7 +117,7 @@ build cmake_object_order_depends_target_HttpResolver: phony || src/copy_plugInfo
 build src/CMakeFiles/HttpResolver.dir/resolver.cpp.o: CXX_COMPILER__HttpResolver_unscanned_ /Users/andrewbeers/git/projects/usd-http-asset-resolver/project/src/resolver.cpp || cmake_object_order_depends_target_HttpResolver
   DEFINES = -DHttpResolver_EXPORTS
   DEP_FILE = src/CMakeFiles/HttpResolver.dir/resolver.cpp.o.d
-  FLAGS = -std=gnu++17 -arch arm64 -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.2.sdk -fPIC -fcolor-diagnostics -Wno-deprecated
+  FLAGS = -std=gnu++17 -arch arm64 -fPIC -fcolor-diagnostics -Wno-deprecated
   INCLUDES = -I/Users/andrewbeers/.pyenv/versions/3.9.8/include/python3.9 -isystem /Users/andrewbeers/libs/usd-dev/include
   OBJECT_DIR = src/CMakeFiles/HttpResolver.dir
   OBJECT_FILE_DIR = src/CMakeFiles/HttpResolver.dir
@@ -130,10 +130,10 @@ build src/CMakeFiles/HttpResolver.dir/resolver.cpp.o: CXX_COMPILER__HttpResolver
 #############################################
 # Link the shared library build/install/libHttpResolver.so
 
-build build/install/libHttpResolver.so: CXX_SHARED_LIBRARY_LINKER__HttpResolver_ src/CMakeFiles/HttpResolver.dir/resolver.cpp.o | /Users/andrewbeers/.pyenv/versions/3.9.8/lib/libpython3.9.dylib /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.2.sdk/usr/lib/libcurl.tbd || src/copy_plugInfo
-  ARCH_FLAGS = -arch arm64 -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.2.sdk
+build build/install/libHttpResolver.so: CXX_SHARED_LIBRARY_LINKER__HttpResolver_ src/CMakeFiles/HttpResolver.dir/resolver.cpp.o | /Users/andrewbeers/.pyenv/versions/3.9.8/lib/libpython3.9.dylib /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.4.sdk/usr/lib/libcurl.tbd || src/copy_plugInfo
+  ARCH_FLAGS = -arch arm64
   INSTALLNAME_DIR = @rpath/
-  LINK_LIBRARIES = -Wl,-rpath,/Users/andrewbeers/libs/usd-dev/lib  -lboost_python39  -lusd_ar  -lusd_tf  /Users/andrewbeers/.pyenv/versions/3.9.8/lib/libpython3.9.dylib  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.2.sdk/usr/lib/libcurl.tbd
+  LINK_LIBRARIES = -Wl,-rpath,/Users/andrewbeers/libs/usd-dev/lib  -lboost_python39  -lusd_ar  -lusd_tf  /Users/andrewbeers/.pyenv/versions/3.9.8/lib/libpython3.9.dylib  /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.4.sdk/usr/lib/libcurl.tbd
   LINK_PATH = -L/Users/andrewbeers/libs/usd-dev/lib
   OBJECT_DIR = src/CMakeFiles/HttpResolver.dir
   POST_BUILD = :
